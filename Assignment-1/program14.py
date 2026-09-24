@@ -38,9 +38,6 @@ student.update({
 print("After update():", student)
 
 
-# 7. Checking whether a key exists
-print("\nIs 'name' present?", "name" in student)
-
 
 # 8. Getting all keys
 print("\nKeys:", student.keys())

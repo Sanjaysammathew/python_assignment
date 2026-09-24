@@ -116,7 +116,7 @@ def check_balance():
         print("Account not found.")
         return
 
-    print("\n----- Account Details -----")
+    print("\n Account Details ")
     print("Account Number:", account["account_number"])
     print("Name:", account["name"])
     print("Balance: ₹", account["balance"])
@@ -133,7 +133,7 @@ def transaction_history():
         print("Account not found.")
         return
 
-    print("\n----- Transaction History -----")
+    print("\n Transaction History ")
 
     if len(account["transactions"]) == 0:
         print("No transactions found.")
@@ -143,13 +143,11 @@ def transaction_history():
             print(transaction)
 
 
-# --------------------------------
-# Main Program
-# --------------------------------
+
 
 while True:
 
-    print("\n===== MINI BANKING APPLICATION =====")
+    print("\n MINI BANKING APPLICATION")
     print("1. Create Account")
     print("2. Deposit")
     print("3. Withdraw")

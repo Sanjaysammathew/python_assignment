@@ -26,12 +26,12 @@ def view_students():
         print("No students found.")
 
     else:
-        print("\n----- Student List -----")
+        print("\n Student List ")
 
         for student in students:
             print("Name:", student["name"])
             print("Mark:", student["mark"])
-            print("------------------------")
+    
 
 
 # 3. Search Student
@@ -115,9 +115,7 @@ def display_passed_students():
             )
 
 
-# --------------------------------
-# Main Program
-# --------------------------------
+
 
 while True:
 

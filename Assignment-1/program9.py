@@ -32,14 +32,14 @@ def view_employees():
         print("No employees available.")
 
     else:
-        print("\n----- Employee List -----")
+        print("\nEmployee List ")
 
         for employee in employees:
             print("ID:", employee["id"])
             print("Name:", employee["name"])
             print("Department:", employee["department"])
             print("Salary:", employee["salary"])
-            print("------------------------")
+         
 
 
 # 3. Search Employee
@@ -103,20 +103,19 @@ def employees_by_department():
         print("No employees found in this department.")
 
     else:
-        print("\n----- Employees in", department, "-----")
+        print("\n Employees in", department)
 
         for employee in result:
 
             print("ID:", employee["id"])
             print("Name:", employee["name"])
             print("Salary:", employee["salary"])
-            print("------------------------")
 
 
 
 while True:
 
-    print("\n===== EMPLOYEE MANAGEMENT =====")
+    print("\n EMPLOYEE MANAGEMENT ")
     print("1. Add Employee")
     print("2. View Employees")
     print("3. Search Employee")

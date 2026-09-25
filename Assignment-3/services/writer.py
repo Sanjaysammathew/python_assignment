@@ -55,7 +55,7 @@ def display_students(file_path):
         )
 
 
-def append_student(file_path):
+def append_student(primary_file, secondary_file):
 
     print("\nADD EXTRA DETAILS")
 
@@ -65,11 +65,24 @@ def append_student(file_path):
         print("Error: Student ID cannot be empty.")
         return
 
-    students = read_students(file_path)
+    primary_students = read_students(primary_file)
 
-    for student in students:
+    student_exists = False
+
+    for student in primary_students:
         if student["student_id"] == student_id:
-            print("Error: Student ID already exists.")
+            student_exists = True
+            break
+
+    if not student_exists:
+        print("Error: Student ID does not exist in primary file.")
+        return
+
+    secondary_students = read_students(secondary_file)
+
+    for student in secondary_students:
+        if student["student_id"] == student_id:
+            print("Error: Student ID already has extra details.")
             return
 
     sports = input("Sports: ").strip()
@@ -90,7 +103,7 @@ def append_student(file_path):
     }
 
     try:
-        with open(file_path,"a") as file:
+        with open(secondary_file, "a") as file:
 
             writer = csv.DictWriter(
                 file,
@@ -103,7 +116,6 @@ def append_student(file_path):
 
     except FileNotFoundError:
         print("Error: File not found.")
-
 
     except Exception as e:
         print("Error:", e)

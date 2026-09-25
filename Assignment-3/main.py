@@ -36,7 +36,7 @@ def main():
             display_students(primary_path)
 
         elif choice == "2":
-            append_student(secondary_path)
+            append_student(primary_path,secondary_path)
 
         elif choice == "3":
             search_student(secondary_path)

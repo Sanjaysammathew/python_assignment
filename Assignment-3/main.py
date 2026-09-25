@@ -1,16 +1,16 @@
 from services.path_manager import (
     get_primary_path,
-    get_secondary_path
+    get_secondary_path,
+    path_details
 )
 
 from services.reader import display_students
 
 from services.writer import (
-    read_students,
-    append_students,
+    append_student,
     search_student,
+    update_student
 )
-
 
 def main():
 
@@ -20,46 +20,39 @@ def main():
     while True:
 
         print("\n")
-        print("=" * 40)
-        print("     STUDENT MANAGEMENT SYSTEM")
-        print("=" * 40)
+        print(" STUDENT MANAGEMENT SYSTEM")
 
         print("1. Display Students")
-        print("2. Append Student")
-        print("3. Search Student")
-        print("4. Exit")
+        print("2. Append Details")
+        print("3. Search Details")
+        print("4. Update Details")
+        print("5. Path Details")
+        print("6. Exit")
 
-        print("=" * 40)
 
         choice = input("Enter your choice: ")
 
-        try:
+        if choice == "1":
+            display_students(primary_path)
 
-            if choice == "1":
+        elif choice == "2":
+            append_student(secondary_path)
 
-                display_students(primary_path)
+        elif choice == "3":
+            search_student(secondary_path)
 
-            elif choice == "2":
+        elif choice == "4":
+            update_student(secondary_path)
 
-                append_students(secondary_path)
+        elif choice == "5":
+            path_details()
 
-            elif choice == "3":
+        elif choice == "6":
+            print("Exit")
+            break
 
-                search_student(secondary_path)
-
-            elif choice == "4":
-
-                print("Thank you!")
-                break
-
-            else:
-
-                print("Error: Invalid choice.")
-
-        except Exception as e:
-
-            print("Error:", e)
+        else:
+            print("Error: Invalid choice.")
 
 
-if __name__ == "__main__":
-    main()
+main()

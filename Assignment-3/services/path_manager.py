@@ -36,5 +36,3 @@ def get_primary_path():
 def get_secondary_path():
     return Path(os.getenv("SECONDARY_FILE"))
 
-
-path_details()

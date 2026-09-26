@@ -43,11 +43,13 @@ def write_students(file_path, students):
 def display_students(file_path):
     students = read_students(file_path)
 
+    students = sorted(students, key=lambda student: student["student_id"])
+
     print("\nSECONDARY STUDENT DETAILS")
 
-    for student in students:
+    for index, student in enumerate(students, start=1):
         print(
-            f"ID: {student['student_id']} | "
+            f"{index}. ID: {student['student_id']} | "
             f"Sports: {student['sports']} | "
             f"Clubs: {student['clubs']} | "
             f"Certifications: {student['certifications']} | "
@@ -66,7 +68,6 @@ def append_student(primary_file, secondary_file):
         return
 
     primary_students = read_students(primary_file)
-
     student_exists = False
 
     for student in primary_students:
@@ -150,6 +151,24 @@ def search_student(file_path):
     print("Student not found.")
 
 
+def display_secondary_file(file_path):
+    students = read_students(file_path)
+
+    print("\nSECONDARY FILE DETAILS")
+
+    if not students:
+        print("No student details found.")
+        return
+
+    for student in students:
+        print(
+            f"ID: {student['student_id']} | "
+            f"Sports: {student['sports']} | "
+            f"Clubs: {student['clubs']} | "
+            f"Certifications: {student['certifications']} | "
+            f"Achievements: {student['achievements']}"
+        )
+
 def update_student(file_path):
 
     print("\nUPDATE STUDENT")
@@ -186,4 +205,6 @@ def update_student(file_path):
             return
 
     print("Student not found.")
+
+    
 

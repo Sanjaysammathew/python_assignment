@@ -1,15 +1,16 @@
-from services.path_manager import (
+from utilities.path_manager import (
     get_primary_path,
     get_secondary_path,
     path_details
 )
 
-from services.reader import display_students
+from utilities.reader import display_students
 
-from services.writer import (
+from utilities.writer import (
     append_student,
     search_student,
-    update_student
+    update_student,
+    display_secondary_file
 )
 
 def main():
@@ -27,7 +28,8 @@ def main():
         print("3. Search Details")
         print("4. Update Details")
         print("5. Path Details")
-        print("6. Exit")
+        print("6. Display Extracurricular Details")
+        print("7. Exit")
 
 
         choice = input("Enter your choice: ")
@@ -48,8 +50,11 @@ def main():
             path_details()
 
         elif choice == "6":
-            print("Exit")
-            break
+            display_secondary_file(secondary_path)
+
+        elif choice=="7" :
+           print("Exit")
+           break
 
         else:
             print("Error: Invalid choice.")

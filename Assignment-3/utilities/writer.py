@@ -31,7 +31,6 @@ def write_students(file_path, students):
 
             writer.writeheader()
             writer.writerows(students)
-
             return True
 
     except Exception as e:
@@ -145,7 +144,6 @@ def search_student(file_path):
                 f"Certifications: {student['certifications']} | "
                 f"Achievements: {student['achievements']}"
             )
-
             return
 
     print("Student not found.")
@@ -201,7 +199,6 @@ def update_student(file_path):
 
             if write_students(file_path, students):
                 print("Student updated successfully.")
-
             return
 
     print("Student not found.")

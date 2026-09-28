@@ -1,7 +1,5 @@
 
 import csv
-
-
 SECONDARY_FIELDS = ["student_id","sports","clubs","certifications", "achievements"]
 
 def read_students(file_path):

@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+
+
 @dataclass
 class Student:
     student_id: str
@@ -26,6 +28,14 @@ class Student:
             return "C"
         else:
             return "D"
+
+    @property
+    def highest_mark(self) -> float:
+        return max(self.marks)
+
+    @property
+    def lowest_Mark(self) -> float:
+        return min(self.marks)
 
     @staticmethod
     def is_valid_mark(mark: float) -> bool:

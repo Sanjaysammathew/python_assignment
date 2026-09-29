@@ -3,40 +3,30 @@ from utilities.student_file import StudentFile
 
 
 def main() -> None:
-
     # Create StudentFile object
-    file: StudentFile = StudentFile(
-        "data/students.csv",
-        "data/student_records.csv"
-    )
-
+    file: StudentFile = StudentFile("data/students.csv", "data/student_records.csv")
     while True:
-
-        print("\n===== STUDENT MANAGEMENT =====")
+        print("\nSTUDENT MANAGEMENT")
         print("1. Display Students")
         print("2. Add Student")
         print("3. Student Performance")
         print("4. File Details")
-        print("5. Exit")
+        print("5. Highest Mark")
+        print("6. Lowest Mark")
+        print("7. Exit")
 
         choice: str = input("Enter your choice: ")
 
         if choice == "1":
-
             file.display_students()
 
         elif choice == "2":
-
             student_id: str = input("Student ID: ")
-
             marks: list[float] = []
 
             for i in range(1, 4):
-
                 try:
-                    mark: float = float(
-                        input(f"Mark {i}: ")
-                    )
+                    mark: float = float(input(f"Mark {i}: "))
                 except ValueError:
                     print("Mark must be a number.")
                     break
@@ -48,31 +38,20 @@ def main() -> None:
                 marks.append(mark)
 
             else:
-
                 sports: str = input("Sports: ")
                 clubs: str = input("Clubs: ")
-
-                file.append_student(
-                    student_id,
-                    marks,
-                    sports,
-                    clubs
-                )
+                file.append_student(student_id, marks, sports, clubs)
 
         elif choice == "3":
-
-            records: list[dict[str, str]] = (
-                file.read_records()
-            )
+            records: list[dict[str, str]] = file.read_records()
 
             print("\nSTUDENT PERFORMANCE")
-
             for record in records:
 
                 marks: list[float] = [
                     float(record["mark1"]),
                     float(record["mark2"]),
-                    float(record["mark3"])
+                    float(record["mark3"]),
                 ]
 
                 student: Student = Student(
@@ -81,7 +60,7 @@ def main() -> None:
                     age=0,
                     course="",
                     email="",
-                    marks=marks
+                    marks=marks,
                 )
 
                 print(
@@ -96,6 +75,44 @@ def main() -> None:
             file.file_details()
 
         elif choice == "5":
+
+            records: list[dict[str, str]] = file.read_records()
+            for record in records:
+                marks: list[float] = [
+                    float(record["mark1"]),
+                    float(record["mark2"]),
+                    float(record["mark3"]),
+                ]
+                student: Student = Student(
+                    student_id=record["student_id"],
+                    name="Student",
+                    age=0,
+                    course="",
+                    email="",
+                    marks=marks,
+                )
+                print(f"{student.student_id} | Highest mark: {student.highest_mark}")
+
+        elif choice == "6":
+
+            records: list[dict[str, str]] = file.read_records()
+            for record in records:
+                marks: list[float] = [
+                    float(record["mark1"]),
+                    float(record["mark2"]),
+                    float(record["mark3"]),
+                ]
+                student: Student = Student(
+                    student_id=record["student_id"],
+                    name="Student",
+                    age=0,
+                    course="",
+                    email="",
+                    marks=marks,
+                )
+                print(f"{student.student_id} | Lowest mark: {student.lowest_Mark}")
+
+        elif choice == "7":
 
             print("Program ended.")
             break

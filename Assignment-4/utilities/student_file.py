@@ -33,13 +33,11 @@ class StudentFile:
         with self.records_path.open("a", newline="") as file:
             writer = csv.writer(file)
             writer.writerow([student_id, marks[0], marks[1], marks[2], sports, clubs])
-
         print("Student added successfully.")
 
     def file_details(self) -> None:
         print("\nFILE DETAILS")
         print(f"Primary: {self.primary_path}")
         print(f"Primary exists: " f"{self.primary_path.exists()}")
-
         print(f"Records: {self.records_path}")
         print(f"Records exists: " f"{self.records_path.exists()}")

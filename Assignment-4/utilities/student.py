@@ -1,6 +1,4 @@
 from dataclasses import dataclass
-
-
 @dataclass
 class Student:
     student_id: str
@@ -16,23 +14,18 @@ class Student:
 
     @property
     def average(self) -> float:
-        return self.total / len(self.marks) if self.marks else 0.0
+        return self.total / len(self.marks)
 
     @property
     def grade(self) -> str:
         if self.average >= 90:
             return "A"
-        if self.average >= 75:
+        elif self.average >= 75:
             return "B"
-        if self.average >= 60:
+        elif self.average >= 60:
             return "C"
-        return "D"
-
-    def summary(self) -> str:
-        return (
-            f"{self.name} | Total: {self.total:.0f} | "
-            f"Average: {self.average:.2f} | Grade: {self.grade}"
-        )
+        else:
+            return "D"
 
     @staticmethod
     def is_valid_mark(mark: float) -> bool:

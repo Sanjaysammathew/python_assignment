@@ -7,9 +7,7 @@ from services.student_analysis_service import StudentAnalysisService
 
 
 def display_menu() -> None:
-	print("\n==============================")
 	print("       STUDENT ANALYSIS")
-	print("==============================")
 	print("1. Display Students")
 	print("2. Analyze Student")
 	print("3. Class Average")
@@ -20,8 +18,7 @@ def display_menu() -> None:
 
 
 def display_student_analysis(report: dict[str, str]) -> None:
-	print("\nStudent Analysis")
-	print("------------------------------")
+	print("\nStudent Analysis") 
 	print(f"ID       : {report['student_id']}")
 	print(f"Name     : {report['name']}")
 	print(f"Age      : {report['age']}")
@@ -84,7 +81,7 @@ def main() -> None:
 					print(f"{subject:<7}: {average:.2f}")
 				print(f"\nHighest Subject Average: {highest_subject}")
 			else:
-				print("Invalid choice. Please enter a number from 1 to 7.")
+				print("Invalid choice. Please enter a Correct ID")
 		except (StudentAnalysisError, OSError, ValueError) as error:
 			print(f"Error: {error}")
 

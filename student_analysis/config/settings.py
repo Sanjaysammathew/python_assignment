@@ -4,8 +4,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
-
+load_dotenv()
 
 def _get_file_path(variable_name: str, default: str) -> str:
 	file_path = Path(os.getenv(variable_name, default))

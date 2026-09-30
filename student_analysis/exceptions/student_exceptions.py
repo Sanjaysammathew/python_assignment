@@ -1,6 +1,13 @@
 class StudentAnalysisError(Exception):
-	"""Base exception for expected student analysis errors."""
-
-
+    pass
 class StudentNotFoundError(StudentAnalysisError):
-	"""Raised when a requested student ID is not in the student records."""
+    pass
+
+class StudentAlreadyExistsError(StudentAnalysisError):
+    pass
+
+class InvalidStudentDataError(StudentAnalysisError):
+    pass
+
+class StudentFileError(StudentAnalysisError):
+    pass

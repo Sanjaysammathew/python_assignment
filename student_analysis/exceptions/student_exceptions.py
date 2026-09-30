@@ -1,13 +1,23 @@
-class StudentAnalysisError(Exception):
-    pass
-class StudentNotFoundError(StudentAnalysisError):
-    pass
+class StudentNotFoundError(Exception):
+    def __init__(self, message: str = "Student not found") -> None:
+        super().__init__(message)
 
-class StudentAlreadyExistsError(StudentAnalysisError):
-    pass
 
-class InvalidStudentDataError(StudentAnalysisError):
-    pass
+class StudentAlreadyExistsError(Exception):
+    def __init__(self, message: str = "Student already exists") -> None:
+        super().__init__(message)
 
-class StudentFileError(StudentAnalysisError):
-    pass
+
+class InvalidStudentDataError(Exception):
+    def __init__(self, message: str = "Invalid student data") -> None:
+        super().__init__(message)
+
+
+class StudentMarksNotFoundError(Exception):
+    def __init__(self, message: str = "Marks not found for student") -> None:
+        super().__init__(message)
+
+
+class NoMarksAvailableError(Exception):
+    def __init__(self, message: str = "No marks are available for analysis") -> None:
+        super().__init__(message)

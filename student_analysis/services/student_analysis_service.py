@@ -1,7 +1,6 @@
-from functools import wraps
 from pathlib import Path
-from typing import Any, Callable
 
+from config.settings import MAX_MARK, MIN_MARK, PASSING_MARK, SUBJECTS
 from models.marks import Marks
 from models.student import Student
 from repositories.marks_repository import MarksRepository
@@ -13,15 +12,6 @@ from exceptions.student_exceptions import (
     StudentNotFoundError,
 )
 from utilities.csv_utils import write_csv
-
-
-# def calculation_logger(function: Callable[..., Any]) -> Callable[..., Any]:
-#     @wraps(function)
-#     def wrapper(*args: Any, **kwargs: Any) -> Any:
-#         print(f"Calculating: {function.__name__}")
-#         return function(*args, **kwargs)
-
-#     return wrapper
 
 
 class StudentAnalysisService:
@@ -58,7 +48,7 @@ class StudentAnalysisService:
             return "B"
         if average >= 60:
             return "C"
-        if average >= 50:
+        if average >= PASSING_MARK:
             return "D"
         return "F"
 
@@ -93,13 +83,26 @@ class StudentAnalysisService:
             "grade": self.calculate_grade(average),
         }
 
-    def get_class_average(self) -> float:
+    def get_subject_average(self, subject: str) -> float | None:
+        selected_subject = next(
+            (
+                configured_subject
+                for configured_subject in SUBJECTS
+                if configured_subject.casefold() == subject.strip().casefold()
+            ),
+            None,
+        )
+        if selected_subject is None:
+            return None
+
         marks_list = self.marks_repository.get_all()
         if not marks_list:
-            raise NoMarksAvailableError("No marks are available for class analysis.")
+            raise NoMarksAvailableError("No marks are available for subject analysis.")
 
-        student_averages = [self.calculate_average(marks) for marks in marks_list]
-        return sum(student_averages) / len(student_averages)
+        subject_marks = map(
+            lambda marks: self._get_subject_marks(marks)[selected_subject], marks_list
+        )
+        return sum(subject_marks) / len(marks_list)
 
     def get_highest_performing_student(self) -> tuple[Student, float]:
         return max(self._get_ranked_students(), key=lambda result: result[1])
@@ -107,7 +110,6 @@ class StudentAnalysisService:
     def get_lowest_performing_student(self) -> tuple[Student, float]:
         return min(self._get_ranked_students(), key=lambda result: result[1])
 
-    
     def get_subject_analysis(self) -> tuple[dict[str, float], str]:
         marks_list = self.marks_repository.get_all()
         if not marks_list:
@@ -118,15 +120,16 @@ class StudentAnalysisService:
                 self._get_subject_marks(marks)[subject] for marks in marks_list
             )
             / len(marks_list)
-            for subject in ("Python", "Java", "DBMS", "Maths")
+            for subject in SUBJECTS
         }
         highest_subject = max(subject_averages.items(), key=lambda item: item[1])[0]
         return subject_averages, highest_subject
 
     def get_passing_students(self) -> list[Student]:
-        return [
-            student for student, average in self._get_ranked_students() if average >= 50
-        ]
+        passing_results = filter(
+            lambda result: result[1] >= PASSING_MARK, self._get_ranked_students()
+        )
+        return list(map(lambda result: result[0], passing_results))
 
     def has_failed_subject(self, student_id: str) -> bool:
         marks = self.marks_repository.get_by_student_id(student_id)
@@ -134,7 +137,9 @@ class StudentAnalysisService:
             raise StudentMarksNotFoundError(
                 f"No marks were found for student '{student_id}'."
             )
-        return any(mark < 50 for mark in self._get_subject_marks(marks).values())
+        return any(
+            mark < PASSING_MARK for mark in self._get_subject_marks(marks).values()
+        )
 
     def add_student_marks(
         self,
@@ -155,12 +160,12 @@ class StudentAnalysisService:
         invalid_marks = [
             mark
             for mark in self._get_subject_marks(new_marks).values()
-            if not 1 <= mark <= 100
+            if not MIN_MARK <= mark <= MAX_MARK
         ]
         if invalid_marks:
             raise InvalidStudentDataError(
                 f"Mark {invalid_marks[0]:g} is outside the allowed range. "
-                "Mark must be between 1 and 100."
+                f"Mark must be between {MIN_MARK} and {MAX_MARK}."
             )
 
         rows = [

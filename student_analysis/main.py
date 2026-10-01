@@ -5,7 +5,7 @@ from exceptions.student_exceptions import (
     StudentMarksNotFoundError,
     StudentNotFoundError,
 )
-from config.settings import MARKS_FILE, STUDENT_FILE
+from config.settings import MARKS_FILE, PASSING_MARK, STUDENT_FILE
 from models.student import Student
 from repositories.marks_repository import MarksRepository
 from repositories.student_repository import StudentRepository
@@ -16,7 +16,7 @@ def display_menu() -> None:
     print("       STUDENT ANALYSIS")
     print("1. Display Students")
     print("2. Analyze Student")
-    print("3. Class Average")
+    print("3. Subject Average")
     print("4. Highest Student")
     print("5. Lowest Student")
     print("6. Subject Analysis")
@@ -75,7 +75,12 @@ def main() -> None:
                 student_id = input("Enter student ID: ").strip()
                 display_student_analysis(analysis_service.analyze_student(student_id))
             elif choice == "3":
-                print(f"Class Average: {analysis_service.get_class_average():.2f}")
+                subject = input("Enter subject: ").strip()
+                average = analysis_service.get_subject_average(subject)
+                if average is None:
+                    print(f"Subject '{subject}' not found.")
+                else:
+                    print(f"\nSubject: {subject}\nAverage: {average:.2f}")
             elif choice == "4":
                 display_ranked_student(
                     "Highest", analysis_service.get_highest_performing_student()
@@ -97,7 +102,9 @@ def main() -> None:
             elif choice == "8":
                 student_id = input("Enter student ID: ").strip()
                 if analysis_service.has_failed_subject(student_id):
-                    print(f"Student {student_id} has a subject mark below 50.")
+                    print(
+                        f"Student {student_id} has a subject mark below {PASSING_MARK}."
+                    )
                 else:
                     print(f"Student {student_id} has passed every subject.")
             elif choice == "9":

@@ -5,12 +5,6 @@ from models.marks import Marks
 from services.student_analysis_service import StudentAnalysisService
 
 
-class EmptyStudentRepository:
-
-    def get_by_id(self, student_id):
-        return None
-
-
 @pytest.fixture
 def service():
     # Calculation methods don't use the repositories, so None is fine.
@@ -49,5 +43,3 @@ def test_highest_and_lowest(service, marks):
 )
 def test_calculate_grade(service, average, expected_grade):
     assert service.calculate_grade(average) == expected_grade
-
-

@@ -1,0 +1,37 @@
+[
+    {
+        "student_id": "S001",
+        "name": "John",
+        "age": 20,
+        "course": "BSc Computer Technology",
+        "email": "john@gmail.com"
+    },
+    {
+        "student_id": "S002",
+        "name": "David",
+        "age": 21,
+        "course": "BSc Computer Technology",
+        "email": "david@gmail.com"
+    },
+    {
+        "student_id": "S003",
+        "name": "Sam",
+        "age": 20,
+        "course": "BSc Computer Technology",
+        "email": "sam@gmail.com"
+    },
+    {
+        "student_id": "S004",
+        "name": "Daniel",
+        "age": 21,
+        "course": "BSc Computer Technology",
+        "email": "daniel@gmail.com"
+    },
+    {
+        "student_id": "S005",
+        "name": "Alex",
+        "age": 20,
+        "course": "BSc Computer Technology",
+        "email": "alex@gmail.com"
+    }
+]

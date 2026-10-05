@@ -1,0 +1,62 @@
+[
+    {
+        "student_id": "S001",
+        "python": 85,
+        "java": 78,
+        "dbms": 92,
+        "maths": 88,
+        "total": 343,
+        "average": 85.75,
+        "grade": "A",
+        "highest": 92,
+        "lowest": 78
+    },
+    {
+        "student_id": "S002",
+        "python": 72,
+        "java": 81,
+        "dbms": 75,
+        "maths": 69,
+        "total": 297,
+        "average": 74.25,
+        "grade": "B",
+        "highest": 81,
+        "lowest": 69
+    },
+    {
+        "student_id": "S004",
+        "python": 65,
+        "java": 70,
+        "dbms": 68,
+        "maths": 72,
+        "total": 275,
+        "average": 68.75,
+        "grade": "C",
+        "highest": 72,
+        "lowest": 65
+    },
+    {
+        "student_id": "S005",
+        "python": 88,
+        "java": 85,
+        "dbms": 91,
+        "maths": 90,
+        "total": 354,
+        "average": 88.50,
+        "grade": "A",
+        "highest": 91,
+        "lowest": 85
+    },
+    {
+        "student_id": "S003",
+        "python": 50,
+        "java": 70,
+        "dbms": 80,
+        "maths": 90,
+        "total": 290,
+        "average": 72.50,
+        "grade": "B",
+        "highest": 90,
+        "lowest": 50
+    }
+]

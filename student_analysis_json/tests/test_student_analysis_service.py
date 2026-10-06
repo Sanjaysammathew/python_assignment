@@ -19,6 +19,7 @@ def marks():
 
 def test_calculate_total(service, marks):
     assert service.calculate_total(marks) == 300
+    assert service.calculate_total_async(marks) == 300
 
 
 def test_calculate_average(service, marks):

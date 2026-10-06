@@ -12,9 +12,6 @@ from exceptions.student_exceptions import (
     StudentMarksNotFoundError,
     StudentNotFoundError,
 )
-from utilities.json_utils import write_json
-
-
 class StudentAnalysisService:
     def __init__(
         self,
@@ -24,15 +21,13 @@ class StudentAnalysisService:
         self.student_repository = student_repository
         self.marks_repository = marks_repository
 
-    def get_all_students(self) -> list[Student]:
-        return self.student_repository.get_all()
+    async def get_all_students(self) -> list[Student]:
+        return await self.student_repository.get_all()
 
     def calculate_total(self, marks: Marks) -> float:
         return sum(self._get_subject_marks(marks).values())
 
-    async def calculate_total_async(self, marks: Marks) -> float:
-        print("Calculating total marks...")
-        await asyncio.sleep(2)
+    def calculate_total_async(self, marks: Marks) -> float:
         return self.calculate_total(marks)
 
     def calculate_average(self, marks: Marks) -> float:
@@ -58,21 +53,24 @@ class StudentAnalysisService:
             return "D"
         return "F"
 
-    def analyze_student(self, student_id: str) -> dict[str, str]:
-        student = self.student_repository.get_by_id(student_id)
+    async def analyze_student(self, student_id: str) -> dict[str, str]:
+        print("Reading student data started")
+        student = await self.student_repository.get_by_id(student_id)
         if student is None:
             raise StudentNotFoundError(f"Student '{student_id}' was not found.")
 
-        marks = self.marks_repository.get_by_student_id(student_id)
+        marks = await self.marks_repository.get_by_student_id(student_id)
         if marks is None:
             raise StudentMarksNotFoundError(
                 f"No marks were found for student '{student_id}'."
             )
 
+        print("Reading student data completed")
+        print("Calculation started")
         subject_marks = self._get_subject_marks(marks)
         total = self.calculate_total(marks)
         average = self.calculate_average(marks)
-        return {
+        report = {
             "student_id": student.student_id,
             "name": student.name,
             "age": str(student.age),
@@ -88,8 +86,10 @@ class StudentAnalysisService:
             "lowest": f"{self.calculate_lowest_mark(marks):g}",
             "grade": self.calculate_grade(average),
         }
+        print("Calculation completed")
+        return report
 
-    def get_subject_average(self, subject: str) -> float | None:
+    async def get_subject_average(self, subject: str) -> float | None:
         selected_subject = next(
             (
                 configured_subject
@@ -101,7 +101,7 @@ class StudentAnalysisService:
         if selected_subject is None:
             return None
 
-        marks_list = self.marks_repository.get_all()
+        marks_list = await self.marks_repository.get_all()
         if not marks_list:
             raise NoMarksAvailableError("No marks are available for subject analysis.")
 
@@ -110,14 +110,16 @@ class StudentAnalysisService:
         )
         return sum(subject_marks) / len(marks_list)
 
-    def get_highest_performing_student(self) -> tuple[Student, float]:
-        return max(self._get_ranked_students(), key=lambda result: result[1])
+    async def get_highest_performing_student(self) -> tuple[Student, float]:
+        ranked_students = await self._get_ranked_students()
+        return max(ranked_students, key=lambda result: result[1])
 
-    def get_lowest_performing_student(self) -> tuple[Student, float]:
-        return min(self._get_ranked_students(), key=lambda result: result[1])
+    async def get_lowest_performing_student(self) -> tuple[Student, float]:
+        ranked_students = await self._get_ranked_students()
+        return min(ranked_students, key=lambda result: result[1])
 
-    def get_subject_analysis(self) -> tuple[dict[str, float], str]:
-        marks_list = self.marks_repository.get_all()
+    async def get_subject_analysis(self) -> tuple[dict[str, float], str]:
+        marks_list = await self.marks_repository.get_all()
         if not marks_list:
             raise NoMarksAvailableError("No marks are available for subject analysis.")
 
@@ -131,14 +133,15 @@ class StudentAnalysisService:
         highest_subject = max(subject_averages.items(), key=lambda item: item[1])[0]
         return subject_averages, highest_subject
 
-    def get_passing_students(self) -> list[Student]:
+    async def get_passing_students(self) -> list[Student]:
         passing_results = filter(
-            lambda result: result[1] >= PASSING_MARK, self._get_ranked_students()
+            lambda result: result[1] >= PASSING_MARK,
+            await self._get_ranked_students(),
         )
         return list(map(lambda result: result[0], passing_results))
 
-    def has_failed_subject(self, student_id: str) -> bool:
-        marks = self.marks_repository.get_by_student_id(student_id)
+    async def has_failed_subject(self, student_id: str) -> bool:
+        marks = await self.marks_repository.get_by_student_id(student_id)
         if marks is None:
             raise StudentMarksNotFoundError(
                 f"No marks were found for student '{student_id}'."
@@ -147,7 +150,7 @@ class StudentAnalysisService:
             mark < PASSING_MARK for mark in self._get_subject_marks(marks).values()
         )
 
-    def add_student_marks(
+    async def add_student_marks(
         self,
         student_id: str,
         python: float,
@@ -156,10 +159,10 @@ class StudentAnalysisService:
         maths: float,
         file_path: str | Path,
     ) -> bool:
-        if self.student_repository.get_by_id(student_id) is None:
+        if await self.student_repository.get_by_id(student_id) is None:
             raise StudentNotFoundError("Student not found.")
 
-        marks_list = self.marks_repository.get_all()
+        marks_list = await self.marks_repository.get_all()
         is_update = any(marks.student_id == student_id for marks in marks_list)
 
         new_marks = Marks(student_id, python, java, dbms, maths)
@@ -180,7 +183,7 @@ class StudentAnalysisService:
             if marks.student_id != student_id
         ]
         rows.append(self._marks_to_json_row(new_marks))
-        write_json(file_path, rows)
+        await self.marks_repository.save_all(rows, file_path)
         return is_update
 
     def _marks_to_json_row(self, marks: Marks) -> dict[str, str | float]:
@@ -198,13 +201,17 @@ class StudentAnalysisService:
             "lowest": self.calculate_lowest_mark(marks),
         }
 
-    def _get_ranked_students(self) -> list[tuple[Student, float]]:
+    async def _get_ranked_students(self) -> list[tuple[Student, float]]:
+        students, marks_list = await asyncio.gather(
+            self.student_repository.get_all(),
+            self.marks_repository.get_all(),
+        )
         students_by_id = {
-            student.student_id: student for student in self.student_repository.get_all()
+            student.student_id: student for student in students
         }
         ranked_students = [
             (students_by_id[marks.student_id], self.calculate_average(marks))
-            for marks in self.marks_repository.get_all()
+            for marks in marks_list
             if marks.student_id in students_by_id
         ]
         if not ranked_students:

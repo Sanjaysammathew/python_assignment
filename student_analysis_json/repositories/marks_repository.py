@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import asdict
 from pathlib import Path
 
@@ -14,8 +15,8 @@ class MarksRepository:
 	def __init__(self, file_path: str | Path) -> None:
 		self._file_path = Path(file_path)
 
-	def get_all(self) -> list[Marks]:
-		rows = read_json(self._file_path)
+	async def get_all(self) -> list[Marks]:
+		rows = await asyncio.to_thread(read_json, self._file_path)
 		return [
 			Marks(
 				student_id=row["student_id"],
@@ -27,39 +28,45 @@ class MarksRepository:
 			for row in rows
 		]
 
-	def get_by_student_id(self, student_id: str) -> Marks | None:
+	async def get_by_student_id(self, student_id: str) -> Marks | None:
+		marks_list = await self.get_all()
 		return next(
-			(marks for marks in self.get_all() if marks.student_id == student_id),
+			(marks for marks in marks_list if marks.student_id == student_id),
 			None,
 		)
 
-	def get_by_id(self, student_id: str) -> Marks | None:
-		return self.get_by_student_id(student_id)
+	async def get_by_id(self, student_id: str) -> Marks | None:
+		return await self.get_by_student_id(student_id)
 
-	def create(self, marks: Marks) -> None:
-		rows = read_json(self._file_path) if self._file_path.exists() else []
+	async def create(self, marks: Marks) -> None:
+		file_exists = await asyncio.to_thread(self._file_path.exists)
+		rows = (
+			await asyncio.to_thread(read_json, self._file_path)
+			if file_exists
+			else []
+		)
 		if any(row.get("student_id") == marks.student_id for row in rows):
 			raise InvalidStudentDataError(
 				f"Marks already exist for student '{marks.student_id}'."
 			)
 		rows.append(self._marks_to_json_row(marks))
-		write_json(self._file_path, rows)
+		await asyncio.to_thread(write_json, self._file_path, rows)
 
-	def update(self, student_id: str, marks: Marks) -> None:
-		rows = read_json(self._file_path)
+	async def update(self, student_id: str, marks: Marks) -> None:
+		rows = await asyncio.to_thread(read_json, self._file_path)
 		for index, row in enumerate(rows):
 			if row.get("student_id") == student_id:
 				updated_marks = asdict(marks)
 				updated_marks["student_id"] = student_id
 				rows[index] = self._marks_to_json_row(Marks(**updated_marks))
-				write_json(self._file_path, rows)
+				await asyncio.to_thread(write_json, self._file_path, rows)
 				return
 		raise StudentMarksNotFoundError(
 			f"No marks were found for student '{student_id}'."
 		)
 
-	def delete(self, student_id: str) -> None:
-		rows = read_json(self._file_path)
+	async def delete(self, student_id: str) -> None:
+		rows = await asyncio.to_thread(read_json, self._file_path)
 		remaining_rows = [
 			row for row in rows if row.get("student_id") != student_id
 		]
@@ -67,7 +74,15 @@ class MarksRepository:
 			raise StudentMarksNotFoundError(
 				f"No marks were found for student '{student_id}'."
 			)
-		write_json(self._file_path, remaining_rows)
+		await asyncio.to_thread(write_json, self._file_path, remaining_rows)
+
+	async def save_all(
+		self,
+		rows: list[dict[str, str | float]],
+		file_path: str | Path | None = None,
+	) -> None:
+		target_path = Path(file_path) if file_path is not None else self._file_path
+		await asyncio.to_thread(write_json, target_path, rows)
 
 	@staticmethod
 	def _marks_to_json_row(marks: Marks) -> dict[str, str | float]:

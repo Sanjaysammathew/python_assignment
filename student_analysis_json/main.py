@@ -1,5 +1,6 @@
 import asyncio
 
+from config.logging_config import configure_logging
 from exceptions.student_exceptions import (
     InvalidStudentDataError,
     NoMarksAvailableError,
@@ -57,6 +58,7 @@ def display_ranked_student(label: str, result: tuple[Student, float]) -> None:
 
 
 async def main() -> None:
+    configure_logging()
     student_repository = StudentRepository(STUDENT_FILE)
     marks_repository = MarksRepository(MARKS_FILE)
     analysis_service = StudentAnalysisService(student_repository, marks_repository)

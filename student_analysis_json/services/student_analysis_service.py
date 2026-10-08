@@ -1,8 +1,11 @@
 import asyncio
+import logging
+from functools import reduce
 from pathlib import Path
 
+from config.logging_config import configure_logging
 from config.settings import MAX_MARK, MIN_MARK, PASSING_MARK, SUBJECTS
-from models.marks import Marks
+from models.marks import Marks, MarksSchema
 from models.student import Student
 from repositories.marks_repository import MarksRepository
 from repositories.student_repository import StudentRepository
@@ -12,6 +15,11 @@ from exceptions.student_exceptions import (
     StudentMarksNotFoundError,
     StudentNotFoundError,
 )
+
+configure_logging()
+logger = logging.getLogger(__name__)
+
+
 class StudentAnalysisService:
     def __init__(
         self,
@@ -22,10 +30,14 @@ class StudentAnalysisService:
         self.marks_repository = marks_repository
 
     async def get_all_students(self) -> list[Student]:
+        logger.info("Fetching all students.")
         return await self.student_repository.get_all()
 
     def calculate_total(self, marks: Marks) -> float:
-        return sum(self._get_subject_marks(marks).values())
+        subject_values = self._get_subject_marks(marks).values()
+        return float(
+            reduce(lambda total, value: total + value, subject_values, 0.0)
+        )
 
     def calculate_total_async(self, marks: Marks) -> float:
         return self.calculate_total(marks)
@@ -54,19 +66,20 @@ class StudentAnalysisService:
         return "F"
 
     async def analyze_student(self, student_id: str) -> dict[str, str]:
-        print("Reading student data started")
+        logger.info("Reading student data for student '%s'.", student_id)
         student = await self.student_repository.get_by_id(student_id)
         if student is None:
+            logger.warning("Student '%s' was not found.", student_id)
             raise StudentNotFoundError(f"Student '{student_id}' was not found.")
 
         marks = await self.marks_repository.get_by_student_id(student_id)
         if marks is None:
+            logger.warning("No marks were found for student '%s'.", student_id)
             raise StudentMarksNotFoundError(
                 f"No marks were found for student '{student_id}'."
             )
 
-        print("Reading student data completed")
-        print("Calculation started")
+        logger.info("Student data retrieved successfully for '%s'.", student_id)
         subject_marks = self._get_subject_marks(marks)
         total = self.calculate_total(marks)
         average = self.calculate_average(marks)
@@ -86,10 +99,11 @@ class StudentAnalysisService:
             "lowest": f"{self.calculate_lowest_mark(marks):g}",
             "grade": self.calculate_grade(average),
         }
-        print("Calculation completed")
+        logger.info("Calculation completed for student '%s'.", student_id)
         return report
 
     async def get_subject_average(self, subject: str) -> float | None:
+        logger.info("Fetching average for subject '%s'.", subject)
         selected_subject = next(
             (
                 configured_subject
@@ -99,10 +113,12 @@ class StudentAnalysisService:
             None,
         )
         if selected_subject is None:
+            logger.warning("Subject '%s' was not found.", subject)
             return None
 
         marks_list = await self.marks_repository.get_all()
         if not marks_list:
+            logger.error("No marks are available for subject analysis.")
             raise NoMarksAvailableError("No marks are available for subject analysis.")
 
         subject_marks = map(
@@ -112,15 +128,18 @@ class StudentAnalysisService:
 
     async def get_highest_performing_student(self) -> tuple[Student, float]:
         ranked_students = await self._get_ranked_students()
+        logger.info("Finding the highest-performing student.")
         return max(ranked_students, key=lambda result: result[1])
 
     async def get_lowest_performing_student(self) -> tuple[Student, float]:
         ranked_students = await self._get_ranked_students()
+        logger.info("Finding the lowest-performing student.")
         return min(ranked_students, key=lambda result: result[1])
 
     async def get_subject_analysis(self) -> tuple[dict[str, float], str]:
         marks_list = await self.marks_repository.get_all()
         if not marks_list:
+            logger.error("No marks are available for subject analysis.")
             raise NoMarksAvailableError("No marks are available for subject analysis.")
 
         subject_averages = {
@@ -134,6 +153,7 @@ class StudentAnalysisService:
         return subject_averages, highest_subject
 
     async def get_passing_students(self) -> list[Student]:
+        logger.info("Finding all students who passed.")
         passing_results = filter(
             lambda result: result[1] >= PASSING_MARK,
             await self._get_ranked_students(),
@@ -159,19 +179,39 @@ class StudentAnalysisService:
         maths: float,
         file_path: str | Path,
     ) -> bool:
+        logger.info("Adding or updating marks for student '%s'.", student_id)
         if await self.student_repository.get_by_id(student_id) is None:
+            logger.warning("Student '%s' was not found during mark update.", student_id)
             raise StudentNotFoundError("Student not found.")
 
         marks_list = await self.marks_repository.get_all()
         is_update = any(marks.student_id == student_id for marks in marks_list)
 
-        new_marks = Marks(student_id, python, java, dbms, maths)
+        payload = MarksSchema(
+            student_id=student_id,
+            python=python,
+            java=java,
+            dbms=dbms,
+            maths=maths,
+        )
+        new_marks = Marks(
+            student_id=payload.student_id,
+            python=payload.python,
+            java=payload.java,
+            dbms=payload.dbms,
+            maths=payload.maths,
+        )
         invalid_marks = [
             mark
             for mark in self._get_subject_marks(new_marks).values()
             if not MIN_MARK <= mark <= MAX_MARK
         ]
         if invalid_marks:
+            logger.error(
+                "Attempted mark %s is outside the allowed range for student '%s'.",
+                invalid_marks[0],
+                student_id,
+            )
             raise InvalidStudentDataError(
                 f"Mark {invalid_marks[0]:g} is outside the allowed range. "
                 f"Mark must be between {MIN_MARK} and {MAX_MARK}."

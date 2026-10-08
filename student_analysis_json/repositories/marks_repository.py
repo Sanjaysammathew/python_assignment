@@ -1,14 +1,17 @@
 import asyncio
+import logging
 from dataclasses import asdict
 from pathlib import Path
 
 from config.settings import PASSING_MARK
 from exceptions.student_exceptions import (
-	InvalidStudentDataError,
-	StudentMarksNotFoundError,
+    InvalidStudentDataError,
+    StudentMarksNotFoundError,
 )
-from models.marks import Marks
+from models.marks import Marks, MarksSchema
 from utilities.json_utils import read_json, write_json
+
+logger = logging.getLogger(__name__)
 
 
 class MarksRepository:
@@ -16,6 +19,7 @@ class MarksRepository:
 		self._file_path = Path(file_path)
 
 	async def get_all(self) -> list[Marks]:
+		logger.info("Fetching all marks from %s.", self._file_path)
 		rows = await asyncio.to_thread(read_json, self._file_path)
 		return [
 			Marks(
@@ -29,6 +33,7 @@ class MarksRepository:
 		]
 
 	async def get_by_student_id(self, student_id: str) -> Marks | None:
+		logger.info("Fetching marks for student '%s'.", student_id)
 		marks_list = await self.get_all()
 		return next(
 			(marks for marks in marks_list if marks.student_id == student_id),
@@ -39,6 +44,7 @@ class MarksRepository:
 		return await self.get_by_student_id(student_id)
 
 	async def create(self, marks: Marks) -> None:
+		MarksSchema.model_validate(asdict(marks))
 		file_exists = await asyncio.to_thread(self._file_path.exists)
 		rows = (
 			await asyncio.to_thread(read_json, self._file_path)
@@ -46,6 +52,7 @@ class MarksRepository:
 			else []
 		)
 		if any(row.get("student_id") == marks.student_id for row in rows):
+			logger.warning("Marks already exist for student '%s'.", marks.student_id)
 			raise InvalidStudentDataError(
 				f"Marks already exist for student '{marks.student_id}'."
 			)
@@ -53,6 +60,8 @@ class MarksRepository:
 		await asyncio.to_thread(write_json, self._file_path, rows)
 
 	async def update(self, student_id: str, marks: Marks) -> None:
+		logger.info("Updating marks for student '%s'.", student_id)
+		MarksSchema.model_validate(asdict(marks))
 		rows = await asyncio.to_thread(read_json, self._file_path)
 		for index, row in enumerate(rows):
 			if row.get("student_id") == student_id:
@@ -61,16 +70,19 @@ class MarksRepository:
 				rows[index] = self._marks_to_json_row(Marks(**updated_marks))
 				await asyncio.to_thread(write_json, self._file_path, rows)
 				return
+		logger.error("No marks were found for student '%s'.", student_id)
 		raise StudentMarksNotFoundError(
 			f"No marks were found for student '{student_id}'."
 		)
 
 	async def delete(self, student_id: str) -> None:
+		logger.info("Deleting marks for student '%s'.", student_id)
 		rows = await asyncio.to_thread(read_json, self._file_path)
 		remaining_rows = [
 			row for row in rows if row.get("student_id") != student_id
 		]
 		if len(remaining_rows) == len(rows):
+			logger.error("No marks were found for student '%s'.", student_id)
 			raise StudentMarksNotFoundError(
 				f"No marks were found for student '{student_id}'."
 			)
@@ -81,6 +93,7 @@ class MarksRepository:
 		rows: list[dict[str, str | float]],
 		file_path: str | Path | None = None,
 	) -> None:
+		logger.info("Saving marks to %s.", file_path or self._file_path)
 		target_path = Path(file_path) if file_path is not None else self._file_path
 		await asyncio.to_thread(write_json, target_path, rows)
 

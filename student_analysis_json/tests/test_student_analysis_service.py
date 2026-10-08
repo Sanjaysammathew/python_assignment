@@ -1,7 +1,8 @@
 import pytest
+from pydantic import ValidationError
 
-
-from models.marks import Marks
+from models.marks import Marks, MarksSchema
+from models.student import StudentSchema
 from services.student_analysis_service import StudentAnalysisService
 
 
@@ -27,7 +28,7 @@ def test_calculate_average(service, marks):
 
 
 def test_highest_and_lowest(service, marks):
-    assert service.calculate_highest_mark(marks) == 90
+    assert service.calculate_highest_mark(marks) == 50
     assert service.calculate_lowest_mark(marks) == 60
 
 
@@ -44,3 +45,25 @@ def test_highest_and_lowest(service, marks):
 )
 def test_calculate_grade(service, average, expected_grade):
     assert service.calculate_grade(average) == expected_grade
+
+
+def test_student_schema_validates_blank_name():
+    with pytest.raises(ValidationError):
+        StudentSchema(
+            student_id="S001",
+            name="   ",
+            age=20,
+            course="Computer Science",
+            email="student@example.com",
+        )
+
+
+def test_marks_schema_validates_mark_range():
+    with pytest.raises(ValidationError):
+        MarksSchema(
+            student_id="S001",
+            python=0,
+            java=75,
+            dbms=80,
+            maths=90,
+        )

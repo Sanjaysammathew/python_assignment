@@ -35,9 +35,7 @@ class StudentAnalysisService:
 
     def calculate_total(self, marks: Marks) -> float:
         subject_values = self._get_subject_marks(marks).values()
-        return float(
-            reduce(lambda total, value: total + value, subject_values, 0.0)
-        )
+        return float(reduce(lambda total, value: total + value, subject_values, 0.0))
 
     def calculate_total_async(self, marks: Marks) -> float:
         return self.calculate_total(marks)
@@ -246,9 +244,7 @@ class StudentAnalysisService:
             self.student_repository.get_all(),
             self.marks_repository.get_all(),
         )
-        students_by_id = {
-            student.student_id: student for student in students
-        }
+        students_by_id = {student.student_id: student for student in students}
         ranked_students = [
             (students_by_id[marks.student_id], self.calculate_average(marks))
             for marks in marks_list

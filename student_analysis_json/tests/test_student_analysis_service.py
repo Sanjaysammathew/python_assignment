@@ -28,7 +28,7 @@ def test_calculate_average(service, marks):
 
 
 def test_highest_and_lowest(service, marks):
-    assert service.calculate_highest_mark(marks) == 50
+    assert service.calculate_highest_mark(marks) == 90
     assert service.calculate_lowest_mark(marks) == 60
 
 

@@ -1,17 +1,5 @@
 [
     {
-        "student_id": "S001",
-        "python": 85.0,
-        "java": 78.0,
-        "dbms": 92.0,
-        "maths": 88.0,
-        "total": 343.0,
-        "average": 85.75,
-        "grade": "A",
-        "highest": 92.0,
-        "lowest": 78.0
-    },
-    {
         "student_id": "S002",
         "python": 72.0,
         "java": 81.0,
@@ -58,5 +46,17 @@
         "grade": "B",
         "highest": 98.0,
         "lowest": 45.0
+    },
+    {
+        "student_id": "S001",
+        "python": 34.0,
+        "java": 56.0,
+        "dbms": 78.0,
+        "maths": 90.0,
+        "total": 258.0,
+        "average": 64.5,
+        "grade": "C",
+        "highest": 90.0,
+        "lowest": 34.0
     }
 ]
